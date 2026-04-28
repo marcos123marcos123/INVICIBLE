@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invincible - Reseña Interactiva</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Slate (Dark mode base), Amber/Yellow (Invincible suit primary accent), Crimson Red (Violence/Blood theme accent), Teal (Secondary UI elements). -->
+    <!-- Application Structure Plan: A single-page interactive dashboard. Chosen because the review text is naturally segmented. A dashboard allows users to digest the 'Ficha Técnica' quickly, interact with a Radar Chart to explore 'Puntos Fuertes' (improving engagement over reading a list), and interact with character cards to reveal their complexities. Navigation is built-in for smooth scrolling between analytical sections. -->
+    <!-- Visualization & Content Choices: 1. Ficha Técnica -> Goal: Inform -> UI Grid Cards -> Fast scanning of metadata. 2. Puntos Fuertes -> Goal: Compare/Organize -> Radar Chart (Chart.js) -> Clicking data points updates contextual text -> Makes reading qualitative analysis engaging and visual. 3. Characters -> Goal: Organize/Detail -> Interactive Flip/Expand Cards (HTML/CSS/JS) -> Allows discovery of character depth. Confirming NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        body {
+            background-color: #0f172a; 
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+        .reveal-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+            opacity: 0;
+        }
+        .reveal-content.active {
+            max-height: 500px;
+            opacity: 1;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .character-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .character-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(234, 179, 8, 0.2);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        invincible: {
+                            yellow: '#eab308',
+                            blue: '#0284c7',
+                            red: '#dc2626'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="antialiased selection:bg-invincible-yellow selection:text-slate-900">
+
+    <nav class="fixed top-0 w-full z-50 glass-panel border-b border-slate-700">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0 font-bold text-xl text-invincible-yellow tracking-widest uppercase">
+                    INVINCIBLE
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#ficha" class="hover:text-invincible-yellow px-3 py-2 rounded-md text-sm font-medium transition-colors">Ficha Técnica</a>
+                        <a href="#trama" class="hover:text-invincible-yellow px-3 py-2 rounded-md text-sm font-medium transition-colors">La Trama</a>
+                        <a href="#analisis" class="hover:text-invincible-yellow px-3 py-2 rounded-md text-sm font-medium transition-colors">Análisis</a>
+                        <a href="#personajes" class="hover:text-invincible-yellow px-3 py-2 rounded-md text-sm font-medium transition-colors">Personajes</a>
+                        <a href="#conclusion" class="hover:text-invincible-yellow px-3 py-2 rounded-md text-sm font-medium transition-colors">Conclusión</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-24 pb-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-24">
+
+        <section id="hero" class="text-center space-y-6 pt-10">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-white">
+                Sangre, Responsabilidad y la <br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-invincible-yellow to-invincible-red">Deconstrucción del Héroe</span>
+            </h1>
+            <p class="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+                Una disección brutal, emocional y profundamente humana de lo que significa tener un poder absoluto y las consecuencias devastadoras que conlleva usarlo.
+            </p>
+            <div class="flex justify-center items-center space-x-2 text-3xl text-invincible-yellow">
+                <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+                <span class="text-lg text-slate-400 ml-2 font-medium">(5/5) Obra Maestra</span>
+            </div>
+        </section>
+
+        <section id="ficha" class="scroll-mt-24">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold border-l-4 border-invincible-blue pl-4">Ficha Técnica</h2>
+                <p class="mt-2 text-slate-400">Datos esenciales y contexto de producción de la serie.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-invincible-yellow transition-colors">
+                    <div class="text-3xl mb-2">&#128253;</div>
+                    <h3 class="text-sm text-slate-400 uppercase font-bold tracking-wider">Producción</h3>
+                    <p class="text-lg font-semibold mt-1">2021 – Presente</p>
+                    <p class="text-sm text-slate-300">Estados Unidos</p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-invincible-yellow transition-colors">
+                    <div class="text-3xl mb-2">&#128101;</div>
+                    <h3 class="text-sm text-slate-400 uppercase font-bold tracking-wider">Creadores</h3>
+                    <p class="text-lg font-semibold mt-1">Robert Kirkman</p>
+                    <p class="text-sm text-slate-300">Ryan Ottley, Cory Walker</p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-invincible-yellow transition-colors">
+                    <div class="text-3xl mb-2">&#127916;</div>
+                    <h3 class="text-sm text-slate-400 uppercase font-bold tracking-wider">Género</h3>
+                    <p class="text-lg font-semibold mt-1">Animación, Acción</p>
+                    <p class="text-sm text-slate-300">Drama, Superhéroes</p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-xl border border-invincible-red shadow-[0_0_15px_rgba(220,38,38,0.2)]">
+                    <div class="text-3xl mb-2 text-invincible-red">&#9888;&#65039;</div>
+                    <h3 class="text-sm text-invincible-red uppercase font-bold tracking-wider">Clasificación</h3>
+                    <p class="text-3xl font-bold mt-1 text-white">+18</p>
+                    <p class="text-xs text-slate-300 mt-1">Violencia explícita y lenguaje</p>
+                </div>
+            </div>
+            
+            <div class="mt-4 bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap items-center justify-between">
+                <div>
+                    <span class="text-slate-400 font-bold mr-2">Plataforma:</span> 
+                    <span class="font-semibold text-white bg-slate-700 px-3 py-1 rounded">Amazon Prime Video</span>
+                </div>
+                <div class="mt-2 sm:mt-0">
+                    <span class="text-slate-400 font-bold mr-2">Voces Destacadas:</span>
+                    <span class="text-sm">Steven Yeun, J.K. Simmons, Sandra Oh, Zazie Beetz</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="trama" class="scroll-mt-24 bg-slate-800/50 rounded-2xl p-8 border border-slate-700">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold border-l-4 border-invincible-yellow pl-4">La Trama: Más allá del rito de iniciación</h2>
+                <p class="mt-2 text-slate-400">Descubre cómo evoluciona la premisa inicial de la serie a través de una estructura narrativa engañosa.</p>
+            </div>
+
+            <p class="text-lg leading-relaxed mb-6">
+                La serie sigue a <strong class="text-white">Mark Grayson</strong>, un adolescente aparentemente normal cuyo padre, <strong class="text-white">Nolan Grayson (Omni-Man)</strong>, es el superhéroe más poderoso del planeta. Cuando Mark finalmente desarrolla sus propios poderes y adopta el nombre de "Invincible", comienza un viaje de aprendizaje bajo la tutela de su padre.
+            </p>
+
+            <button id="btnRevealTwist" class="bg-invincible-red hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center space-x-2">
+                <span>&#128065;</span>
+                <span>Revelar el Giro de la Trama</span>
+            </button>
+
+            <div id="twistContent" class="reveal-content mt-6 bg-slate-900 p-6 rounded-lg border-l-4 border-invincible-red">
+                <p class="text-lg italic text-slate-300">
+                    "Lo que empieza como una historia clásica de formación da un giro de 180 grados al final del primer episodio, revelando una conspiración oscura que cambia por completo la escala de la serie: de un drama escolar a una epopeya cósmica de supervivencia."
+                </p>
+            </div>
+        </section>
+
+        <section id="analisis" class="scroll-mt-24">
+            <div class="mb-8 text-center">
+                <h2 class="text-3xl font-bold inline-block border-b-4 border-invincible-blue pb-2">Análisis de Puntos Fuertes</h2>
+                <p class="mt-4 text-slate-400 max-w-2xl mx-auto">Interactúa con el gráfico de radar seleccionando los puntos para leer el análisis detallado de los pilares que hacen de esta serie una obra maestra.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 shadow-lg">
+                    <div class="chart-container">
+                        <canvas id="puntosFuertesChart"></canvas>
+                    </div>
+                    <p class="text-center text-xs text-slate-500 mt-2">Toca o haz clic en los vértices del gráfico para explorar.</p>
+                </div>
+
+                <div class="bg-slate-800 p-8 rounded-2xl border border-slate-700 h-full flex flex-col justify-center min-h-[300px]">
+                    <h3 id="analisisTitle" class="text-2xl font-bold text-invincible-yellow mb-4">Selecciona un punto en el gráfico</h3>
+                    <p id="analisisText" class="text-lg text-slate-300 leading-relaxed">
+                        El gráfico de la izquierda evalúa el rendimiento de la serie en sus categorías principales. Haz clic en cualquier etiqueta o punto del gráfico para desglosar el análisis de los puntos fuertes extraídos del informe original.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="personajes" class="scroll-mt-24">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold border-l-4 border-invincible-yellow pl-4">Complejidad de Personajes</h2>
+                <p class="mt-2 text-slate-400">Haz clic en cada perfil para revelar la profundidad psicológica y narrativa de los protagonistas.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <button class="character-card text-left bg-slate-800 rounded-xl overflow-hidden border border-slate-700 focus:outline-none" onclick="toggleCharacter(0)">
+                    <div class="bg-invincible-yellow h-2 w-full"></div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-white mb-1">Mark Grayson</h3>
+                        <p class="text-invincible-yellow text-sm font-semibold mb-4">Invincible</p>
+                        <div id="charContent-0" class="text-slate-300 hidden">
+                            <p>Es un protagonista refrescante. Comete errores, pierde batallas y sufre por su idealismo.</p>
+                        </div>
+                        <p id="charHint-0" class="text-sm text-slate-500 mt-4 underline decoration-slate-500 underline-offset-4">Ver análisis completo</p>
+                    </div>
+                </button>
+
+                <button class="character-card text-left bg-slate-800 rounded-xl overflow-hidden border border-slate-700 focus:outline-none" onclick="toggleCharacter(1)">
+                    <div class="bg-invincible-red h-2 w-full"></div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-white mb-1">Nolan Grayson</h3>
+                        <p class="text-invincible-red text-sm font-semibold mb-4">Omni-Man</p>
+                        <div id="charContent-1" class="text-slate-300 hidden">
+                            <p>Se aleja del arquetipo de "Superman malvado" para convertirse en un personaje con motivaciones complejas, atrapado entre su deber biológico y su afecto por la humanidad.</p>
+                        </div>
+                        <p id="charHint-1" class="text-sm text-slate-500 mt-4 underline decoration-slate-500 underline-offset-4">Ver análisis completo</p>
+                    </div>
+                </button>
+
+                <button class="character-card text-left bg-slate-800 rounded-xl overflow-hidden border border-slate-700 focus:outline-none" onclick="toggleCharacter(2)">
+                    <div class="bg-invincible-blue h-2 w-full"></div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-white mb-1">Debbie Grayson</h3>
+                        <p class="text-invincible-blue text-sm font-semibold mb-4">La Perspectiva Humana</p>
+                        <div id="charContent-2" class="text-slate-300 hidden">
+                            <p>Es, quizás, el corazón de la serie. Representa la perspectiva humana en un mundo de dioses, demostrando una fuerza emocional que rivaliza con el poder físico de su esposo.</p>
+                        </div>
+                        <p id="charHint-2" class="text-sm text-slate-500 mt-4 underline decoration-slate-500 underline-offset-4">Ver análisis completo</p>
+                    </div>
+                </button>
+
+            </div>
+        </section>
+
+        <section id="conclusion" class="scroll-mt-24 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 border border-slate-700 mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <h2 class="text-3xl font-bold mb-6 text-white">¿Por qué verla?</h2>
+                    <p class="text-slate-300 mb-4">Invincible logra equilibrar el homenaje a los cómics clásicos con una deconstrucción moderna. Es ideal para quienes disfrutan de:</p>
+                    
+                    <ul class="space-y-4 mt-6">
+                        <li class="flex items-start">
+                            <span class="text-invincible-yellow mr-3 font-bold">&#10003;</span>
+                            <span class="text-slate-200">Historias con giros argumentales impactantes.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-invincible-yellow mr-3 font-bold">&#10003;</span>
+                            <span class="text-slate-200">Narrativas que exploran la geopolítica y el impacto social de los superhéroes (al estilo de <em>The Boys</em>, pero con un tono más sincero).</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-invincible-yellow mr-3 font-bold">&#10003;</span>
+                            <span class="text-slate-200">Desarrollo de personajes a largo plazo.</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="flex flex-col justify-center border-t md:border-t-0 md:border-l border-slate-600 md:pl-12 pt-8 md:pt-0">
+                    <h2 class="text-3xl font-bold mb-4 text-white">Conclusión Final</h2>
+                    <p class="text-lg text-slate-300 italic mb-6">
+                        "Invincible es una obra maestra de la animación contemporánea. Logra que nos importen sus personajes antes de lanzarlos a situaciones imposibles, y nos recuerda que ser 'invencible' no significa no ser derrotado, sino tener la voluntad de levantarse una vez más, sin importar cuánta sangre se haya derramado."
+                    </p>
+                    
+                    <div class="bg-slate-900 p-4 rounded-xl inline-block w-full max-w-xs border border-invincible-yellow">
+                        <p class="text-sm text-slate-400 uppercase font-bold tracking-widest mb-1 text-center">Calificación Final</p>
+                        <div class="flex justify-center space-x-2 text-2xl text-invincible-yellow">
+                            <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+                        </div>
+                        <p class="text-center text-xs text-slate-300 mt-2 font-medium">Imprescindible para fans del género.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-950 border-t border-slate-800 py-8 text-center text-slate-500 text-sm">
+        <p>Basado en el análisis e informe de la serie animada "Invincible".</p>
+    </footer>
+
+    <script>
+        // Data for Interactive Elements
+        const analysisData = {
+            "Violencia con Propósito": "A diferencia de otras producciones, la violencia en Invincible no es gratuita. Es consecuente. Cuando un superhumano golpea a una persona normal, la serie muestra la realidad física de ese acto. Esta crudeza sirve para elevar las apuestas; aquí, los personajes pueden morir, y las heridas dejan cicatrices tanto físicas como psicológicas.",
+            "Estética y Ritmo": "Aunque la animación puede parecer sencilla en los momentos cotidianos, brilla intensamente en las secuencias de acción. El ritmo es frenético pero se toma el tiempo necesario para desarrollar los conflictos internos de los personajes secundarios, haciendo que el mundo se sienta vivo y poblado.",
+            "Trama y Guion": "Lo que empieza como una historia clásica de formación da un giro de 180 grados, revelando una conspiración oscura que cambia por completo la escala de la serie. Las apuestas narrativas están perfectamente construidas."
+        };
+
+        // 1. Reveal Twist Logic
+        const btnReveal = document.getElementById('btnRevealTwist');
+        const twistContent = document.getElementById('twistContent');
+        let twistRevealed = false;
+
+        btnReveal.addEventListener('click', () => {
+            twistRevealed = !twistRevealed;
+            if (twistRevealed) {
+                twistContent.classList.add('active');
+                btnReveal.innerHTML = '<span>&#10006;</span><span>Ocultar Giro</span>';
+                btnReveal.classList.replace('bg-invincible-red', 'bg-slate-700');
+                btnReveal.classList.replace('hover:bg-red-700', 'hover:bg-slate-600');
+            } else {
+                twistContent.classList.remove('active');
+                btnReveal.innerHTML = '<span>&#128065;</span><span>Revelar el Giro de la Trama</span>';
+                btnReveal.classList.replace('bg-slate-700', 'bg-invincible-red');
+                btnReveal.classList.replace('hover:bg-slate-600', 'hover:bg-red-700');
+            }
+        });
+
+        // 2. Interactive Radar Chart (Chart.js)
+        const ctx = document.getElementById('puntosFuertesChart').getContext('2d');
+        
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+
+        const radarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Violencia con Propósito', 'Estética y Ritmo', 'Trama y Guion'],
+                datasets: [{
+                    label: 'Evaluación del Análisis (0-100)',
+                    data: [100, 90, 95],
+                    backgroundColor: 'rgba(234, 179, 8, 0.2)', // Invincible Yellow with opacity
+                    borderColor: '#eab308',
+                    pointBackgroundColor: '#dc2626', // Red points
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#dc2626',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        pointLabels: {
+                            color: '#cbd5e1',
+                            font: { size: 14, weight: 'bold' }
+                        },
+                        ticks: {
+                            display: false, // Hide numeric scale for cleaner look
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        titleColor: '#eab308',
+                        bodyColor: '#fff',
+                        borderColor: '#334155',
+                        borderWidth: 1,
+                        padding: 10,
+                        callbacks: {
+                            label: function(context) {
+                                return ' Puntuación: ' + context.parsed.r + '/100';
+                            }
+                        }
+                    }
+                },
+                onClick: (e, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const label = radarChart.data.labels[index];
+                        updateAnalysisText(label);
+                    }
+                }
+            }
+        });
+
+        // Logic to update text based on chart click
+        function updateAnalysisText(label) {
+            const titleEl = document.getElementById('analisisTitle');
+            const textEl = document.getElementById('analisisText');
+            
+            // Fade out
+            titleEl.style.opacity = 0;
+            textEl.style.opacity = 0;
+            
+            setTimeout(() => {
+                titleEl.textContent = label;
+                titleEl.className = "text-2xl font-bold mb-4 " + (label === 'Violencia con Propósito' ? 'text-invincible-red' : 'text-invincible-yellow');
+                textEl.textContent = analysisData[label];
+                
+                // Fade in
+                titleEl.style.transition = "opacity 0.3s ease";
+                textEl.style.transition = "opacity 0.3s ease";
+                titleEl.style.opacity = 1;
+                textEl.style.opacity = 1;
+            }, 300);
+        }
+
+        // Initialize with default state
+        updateAnalysisText('Violencia con Propósito');
+
+        // 3. Character Cards Toggle Logic
+        function toggleCharacter(index) {
+            const content = document.getElementById(`charContent-${index}`);
+            const hint = document.getElementById(`charHint-${index}`);
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                hint.textContent = "Ocultar análisis";
+            } else {
+                content.classList.add('hidden');
+                hint.textContent = "Ver análisis completo";
+            }
+        }
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
